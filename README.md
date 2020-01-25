@@ -308,15 +308,15 @@ Every API returns a Promise but also has a corresponding API with 'Sync' on the 
 | ----------------------------------------------------------------- | ------------------- | :--: | :-----: | :-----: | :-: |
 | [getAndroidId()](#getandroidid)                                   | `Promise<string>`   |  ❌  |   ✅    |   ❌    | ❌ |
 | [getApiLevel()](#getapilevel)                                     | `Promise<number>`   |  ❌  |   ✅    |   ❌    | ❌ |
-| [getApplicationName()](#getapplicationname)                       | `string`            |  ✅  |   ✅    |   ✅    | ❌ |
+| [getApplicationName()](#getapplicationname)                       | `string`            |  ✅  |   ✅    |   ✅    | ✅ |
 | [getAvailableLocationProviders()](#getAvailableLocationProviders) | `Promise<Object>`   |  ✅  |   ✅    |   ❌    | ❌ |
 | [getBaseOs()](#getbaseOs)                                         | `Promise<string>`   |  ❌  |   ✅    |   ❌    | ✅ |
 | [getBuildId()](#getbuildid)                                       | `Promise<string>`   |  ✅  |   ✅    |   ❌    | ❌ |
 | [getBatteryLevel()](#getbatterylevel)                             | `Promise<number>`   |  ✅  |   ✅    |   ✅    | ✅ |
 | [getBootloader()](#getbootloader)                                 | `Promise<string>`   |  ❌  |   ✅    |   ❌    | ❌ |
 | [getBrand()](#getbrand)                                           | `string`            |  ✅  |   ✅    |   ✅    | ❌ |
-| [getBuildNumber()](#getbuildnumber)                               | `string`            |  ✅  |   ✅    |   ✅    | ❌ |
-| [getBundleId()](#getbundleid)                                     | `string`            |  ✅  |   ✅    |   ✅    | ❌ |
+| [getBuildNumber()](#getbuildnumber)                               | `string`            |  ✅  |   ✅    |   ✅    | ✅ |
+| [getBundleId()](#getbundleid)                                     | `string`            |  ✅  |   ✅    |   ✅    | ✅ |
 | [isCameraPresent()](#iscamerapresent)                             | `Promise<boolean>`  |  ❌  |   ✅    |   ✅    | ✅ |
 | [getCarrier()](#getcarrier)                                       | `Promise<string>`   |  ✅  |   ✅    |   ❌    | ❌ |
 | [getCodename()](#getcodename)                                     | `Promise<string>`   |  ❌  |   ✅    |   ❌    | ❌ |
@@ -336,7 +336,7 @@ Every API returns a Promise but also has a corresponding API with 'Sync' on the 
 | [getIncremental()](#getincremental)                               | `Promise<string>`   |  ❌  |   ✅    |   ❌    | ❌ |
 | [getInstallReferrer()](#getinstallreferrer)                       | `Promise<string>`   |  ❌  |   ✅    |   ❌    | ✅ |
 | [getInstanceId()](#getinstanceid)                                 | `Promise<string>`   |  ❌  |   ✅    |   ❌    | ❌ |
-| [getLastUpdateTime()](#getlastupdatetime)                         | `Promise<number>`   |  ❌  |   ✅    |   ❌    | ❌ |
+| [getLastUpdateTime()](#getlastupdatetime)                         | `Promise<number>`   |  ❌  |   ✅    |   ❌    | ✅ |
 | [getMacAddress()](#getmacaddress)                                 | `Promise<string>`   |  ✅  |   ✅    |   ❌    | ❌ |
 | [getManufacturer()](#getmanufacturer)                             | `Promise<string>`   |  ✅  |   ✅    |   ✅    | ❌ |
 | [getMaxMemory()](#getmaxmemory)                                   | `Promise<number>`   |  ❌  |   ✅    |   ✅    | ✅ |
@@ -345,7 +345,7 @@ Every API returns a Promise but also has a corresponding API with 'Sync' on the 
 | [getPowerState()](#getpowerstate)                                 | `Promise<object>`   |  ✅  |   ✅    |   ❌    | ✅ |
 | [getProduct()](#getproduct)                                       | `Promise<string>`   |  ❌  |   ✅    |   ❌    | ❌ |
 | [getPreviewSdkInt()](#getPreviewSdkInt)                           | `Promise<number>`   |  ❌  |   ✅    |   ❌    | ❌ |
-| [getReadableVersion()](#getreadableversion)                       | `string`            |  ✅  |   ✅    |   ✅    | ❌ |
+| [getReadableVersion()](#getreadableversion)                       | `string`            |  ✅  |   ✅    |   ✅    | ✅ |
 | [getSerialNumber()](#getserialnumber)                             | `Promise<string>`   |  ❌  |   ✅    |   ❌    | ❌ |
 | [getSecurityPatch()](#getsecuritypatch)                           | `Promise<string>`   |  ❌  |   ✅    |   ❌    | ❌ |
 | [getSystemAvailableFeatures()](#getSystemAvailableFeatures)       | `Promise<string[]>` |  ❌  |   ✅    |   ❌    | ❌ |
@@ -358,13 +358,13 @@ Every API returns a Promise but also has a corresponding API with 'Sync' on the 
 | [getUniqueId()](#getuniqueid)                                     | `string`            |  ✅  |   ✅    |   ✅    | ❌ |
 | [getUsedMemory()](#getusedmemory)                                 | `Promise<number>`   |  ✅  |   ✅    |   ❌    | ✅ |
 | [getUserAgent()](#getuseragent)                                   | `Promise<string>`   |  ✅  |   ✅    |   ❌    | ✅ |
-| [getVersion()](#getversion)                                       | `string`            |  ✅  |   ✅    |   ✅    | ❌ |
+| [getVersion()](#getversion)                                       | `string`            |  ✅  |   ✅    |   ✅    | ✅ |
 | [hasNotch()](#hasNotch)                                           | `boolean`           |  ✅  |   ✅    |   ✅    | ❌ |
 | [hasSystemFeature()](#hassystemfeaturefeature)                    | `Promise<boolean>`  |  ❌  |   ✅    |   ❌    | ❌ |
 | [isAirplaneMode()](#isairplanemode)                               | `Promise<boolean>`  |  ❌  |   ✅    |   ❌    | ✅ |
 | [isBatteryCharging()](#isbatterycharging)                         | `Promise<boolean>`  |  ✅  |   ✅    |   ❌    | ✅ |
-| [isEmulator()](#isemulator)                                       | `Promise<boolean>`  |  ✅  |   ✅    |   ✅    | ❌ |
-| [isLandscape()](#isLandscape)                                     | `Promise<boolean>`  |  ✅  |   ✅    |   ✅    | ❌ |
+| [isEmulator()](#isemulator)                                       | `Promise<boolean>`  |  ✅  |   ✅    |   ✅    | ✅ |
+| [isLandscape()](#isLandscape)                                     | `Promise<boolean>`  |  ✅  |   ✅    |   ✅    | ✅ |
 | [isLocationEnabled()](#isLocationEnabled)                         | `Promise<boolean>`  |  ✅  |   ✅    |   ❌    | ✅ |
 | [isHeadphonesConnected()](#isHeadphonesConnected)                 | `Promise<boolean>`  |  ✅  |   ✅    |   ❌    | ❌ |
 | [isPinOrFingerprintSet()](#ispinorfingerprintset)                 | `Promise<boolean>`  |  ✅  |   ✅    |   ✅    | ❌ |
@@ -505,6 +505,10 @@ let buildNumber = DeviceInfo.getBuildNumber();
 // Windows: ?
 ```
 
+#### Notes
+
+> - [web] Inject the environment variable REACT_APP_BUILD_NUMBER during your build process. If you're using [Create React App use this guide](https://create-react-app.dev/docs/adding-custom-environment-variables/) or you can also use [babel-plugin-inline-dotenv](https://github.com/brysgo/babel-plugin-inline-dotenv) in your babel.config.js.
+
 ---
 
 ### getBundleId()
@@ -517,6 +521,10 @@ Gets the application bundle identifier.
 let bundleId = DeviceInfo.getBundleId();
 // "com.example.AwesomeApp"
 ```
+
+#### Notes
+
+> - [web] Inject the environment variable REACT_APP_BUNDLE_ID during your build process. If you're using [Create React App use this guide](https://create-react-app.dev/docs/adding-custom-environment-variables/) or you can also use [babel-plugin-inline-dotenv](https://github.com/brysgo/babel-plugin-inline-dotenv) in your babel.config.js.
 
 ---
 
@@ -830,6 +838,10 @@ DeviceInfo.getLastUpdateTime().then(lastUpdateTime => {
   // Android: 1517681764992
 });
 ```
+
+#### Notes
+
+> - [web] Inject the environment variable REACT_APP_LAST_UPDATE_TIME during your build process. If you're using [Create React App use this guide](https://create-react-app.dev/docs/adding-custom-environment-variables/) or you can also use [babel-plugin-inline-dotenv](https://github.com/brysgo/babel-plugin-inline-dotenv) in your babel.config.js.
 
 ---
 
@@ -1189,6 +1201,10 @@ let version = DeviceInfo.getVersion();
 // Android: "1.0"
 // Windows: ?
 ```
+
+#### Notes
+
+> - [web] Inject the environment variable REACT_APP_VERSION during your build process. If you're using [Create React App use this guide](https://create-react-app.dev/docs/adding-custom-environment-variables/) or you can also use [babel-plugin-inline-dotenv](https://github.com/brysgo/babel-plugin-inline-dotenv) in your babel.config.js.
 
 ---
 
