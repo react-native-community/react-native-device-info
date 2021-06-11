@@ -5,6 +5,7 @@
 #include <regex>
 #include <sstream>
 #include <chrono>
+#include <future>
 
 using namespace winrt::Microsoft::ReactNative;
 using namespace winrt::Windows::Foundation;
@@ -15,12 +16,54 @@ using namespace winrt::Windows::Foundation;
 #define JSVALUEOBJECTPARAMETER const &
 #endif
 
+// The following CALL_INDIRECT helper functions might be removeable in the future, if/when RNW expose some additional helper APIs themselves.
+// The following code copied is from React-Native-Window's repo inside DesktopWindowBridge.h, but is not currently exposed as public apis.
+// BEGIN CALL_INDIRECT HELPERS
+extern "C" {
+  enum AppPolicyWindowingModel { AppPolicyWindowingModel_None, AppPolicyWindowingModel_Universal, AppPolicyWindowingModel_ClassicDesktop, AppPolicyWindowingModel_ClassicPhone } ;
+  LONG AppPolicyGetWindowingModel(HANDLE processToken, AppPolicyWindowingModel *policy);
+  int GetSystemMetrics(int nIndex);
+}
+
+namespace details {
+struct IndirectLibraryDeleter {
+  void operator()(void *l) {
+    WINRT_IMPL_FreeLibrary(l);
+  }
+};
+
+using IndirectLibrary = std::unique_ptr<void, IndirectLibraryDeleter>;
+__declspec(selectany) std::unordered_map<std::wstring, IndirectLibrary> indirectLibraries{};
+} // namespace details
+
+// In later versions of RNW, The following will become available and this can be removed.
+template <typename TFn, typename... TArgs>
+auto CallIndirect(const wchar_t *dllName, const char *fnName, TArgs &&... args) noexcept {
+    if (details::indirectLibraries.count(dllName) == 0) {
+        details::indirectLibraries.emplace(dllName, WINRT_IMPL_LoadLibraryW(dllName));
+    }
+    auto &library = details::indirectLibraries[dllName];
+    auto pfn = reinterpret_cast<TFn>(WINRT_IMPL_GetProcAddress(library.get(), fnName));
+    return pfn(args...);
+}
+
+#define CALL_INDIRECT(dllName, fn, ...) \
+  CallIndirect<decltype(&fn)>(dllName, #fn, __VA_ARGS__)
+// END CALL_INDIRECT HELPERS
+
+
 namespace winrt::RNDeviceInfoCPP
 {
   REACT_MODULE(RNDeviceInfoCPP, L"RNDeviceInfo");
   struct RNDeviceInfoCPP
   {
     const std::string Name = "RNDeviceInfo";
+
+    ReactContext m_reactContext;
+    REACT_INIT(Initialize)
+    void Initialize(ReactContext const& reactContext) noexcept {
+      m_reactContext = reactContext;
+    }
 
     REACT_CONSTANT_PROVIDER(constantsViaConstantsProvider);
     void constantsViaConstantsProvider(ReactConstantProvider& provider) noexcept
@@ -35,6 +78,7 @@ namespace winrt::RNDeviceInfoCPP
       provider.Add(L"appName", getAppNameSync());
       provider.Add(L"brand", getBrandSync());
       provider.Add(L"model", getModelSync());
+      provider.Add(L"deviceType", getDeviceTypeSync());
     }
 
     bool isEmulatorHelper(std::string model)
@@ -42,9 +86,26 @@ namespace winrt::RNDeviceInfoCPP
       return std::regex_match(model, std::regex(".*virtual.*", std::regex_constants::icase));
     }
 
-    bool isTabletHelper(std::string os)
+    // What is a tablet is a debateable topic in Windows, as some windows devices can dynamically switch back and forth.
+    // Also, see isTabletMode() instead of isTablet or deviceType.
+    // More refinement should be applied into this area as neccesary. 
+    bool isTabletHelper()
     {
-      return !std::regex_match(os, std::regex(".*windowsphone.*", std::regex_constants::icase));
+      // AnalyticsInfo doesn't always return the values one might expect.
+      // DeviceForm potential but not inclusive results:
+      // [Mobile, Tablet, Television, Car, Watch, VirtualReality, Desktop, Unknown]
+      // DeviceFamily potential but not inclusive results:
+      // [Windows.Desktop, Windows.Mobile, Windows.Xbox, Windows.Holographic, Windows.Team, Windows.IoT]
+      auto deviceForm = winrt::Windows::System::Profile::AnalyticsInfo::DeviceForm();
+      auto deviceFamily = winrt::Windows::System::Profile::AnalyticsInfo::VersionInfo().DeviceFamily();
+      
+      bool isTabletByAnalytics = deviceForm == L"Tablet" || deviceForm == L"Mobile" || deviceFamily == L"Windows.Mobile";
+      
+      if (isTabletByAnalytics)
+      {
+        return true;
+      }
+      return false;
     }
 
     IAsyncOperation<bool> isPinOrFingerprint()
@@ -57,6 +118,27 @@ namespace winrt::RNDeviceInfoCPP
       {
         return false;
       }
+    }
+	
+    REACT_SYNC_METHOD(getDeviceTypeSync);
+    std::string getDeviceTypeSync() noexcept
+    {
+      if (isTabletHelper()) {
+        return "Tablet";
+      }
+      else if (winrt::Windows::System::Profile::AnalyticsInfo::VersionInfo().DeviceFamily() == L"Windows.Xbox")
+      {
+        return "GamingConsole";
+      }
+      else {
+        return "Desktop";
+      }
+    }
+
+    REACT_METHOD(getDeviceType);
+    void getDeviceType(ReactPromise<std::string> promise) noexcept
+    {
+      promise.Resolve(getDeviceTypeSync());
     }
 
     REACT_SYNC_METHOD(isPinOrFingerprintSetSync);
@@ -75,6 +157,79 @@ namespace winrt::RNDeviceInfoCPP
         });
     }
 
+    REACT_SYNC_METHOD(isKeyboardConnectedSync);
+    bool isKeyboardConnectedSync() noexcept
+    {
+      auto keyboardCapabilities = winrt::Windows::Devices::Input::KeyboardCapabilities();
+      return keyboardCapabilities.KeyboardPresent();
+    }
+
+    REACT_METHOD(isKeyboardConnected);
+    void isKeyboardConnected(ReactPromise<bool> promise) noexcept
+    {
+      promise.Resolve(isKeyboardConnectedSync());
+    }
+
+    REACT_SYNC_METHOD(isMouseConnectedSync);
+    bool isMouseConnectedSync() noexcept
+    {
+      auto mouseCapabilities = winrt::Windows::Devices::Input::MouseCapabilities();
+      return mouseCapabilities.MousePresent();
+    }
+
+    REACT_METHOD(isMouseConnected);
+    void isMouseConnected(ReactPromise<bool> promise) noexcept
+    {
+      promise.Resolve(isMouseConnectedSync());
+    }
+
+    // Helper function, should eventually be removed/replaced when it's exposed through RNW's public API.
+    bool IsXamlIsland() {
+      AppPolicyWindowingModel e;
+      // This value comes from an inline function GetCurrentThreadEffectiveToken() from processthreadsapi.h
+      auto token = (HANDLE)(LONG_PTR) -6;
+      auto windowingModel = CALL_INDIRECT(L"Api-ms-win-appmodel-runtime-l1-1-2.dll", AppPolicyGetWindowingModel, token, &e);
+      if ((ERROR_SUCCESS != windowingModel) || e == AppPolicyWindowingModel_ClassicDesktop) {
+        return true;
+      }
+      return false;
+    }
+
+    REACT_METHOD(isTabletMode);
+    void isTabletMode(ReactPromise<bool> promise) noexcept
+    {
+      if (IsXamlIsland()) {
+        // If the function succeeds, the return value is the requested system metric or configuration setting.
+        // If the function fails, the return value is 0. GetLastError does not provide extended error information.
+        auto ret = CALL_INDIRECT(L"ext-ms-win-ntuser-sysparams-ext-l1-1-0.dll", GetSystemMetrics, SM_CONVERTIBLESLATEMODE);
+        if (ret == 0) 
+        {
+          promise.Resolve(false);
+          return;
+        }
+        promise.Resolve(true);
+      }
+      else
+      {
+        m_reactContext.UIDispatcher().Post([promise]() {
+          auto view = winrt::Windows::UI::ViewManagement::UIViewSettings::GetForCurrentView();
+          auto mode = view.UserInteractionMode();
+          switch(mode)
+          {
+          case winrt::Windows::UI::ViewManagement::UserInteractionMode::Touch:
+          {
+            promise.Resolve(true);
+            return;
+          }
+          case winrt::Windows::UI::ViewManagement::UserInteractionMode::Mouse:
+          default:
+          {
+            promise.Resolve(false);
+          }
+          }    
+        });
+      }
+    }
 
     REACT_SYNC_METHOD(getIpAddressSync);
     std::string getIpAddressSync() noexcept
@@ -574,7 +729,7 @@ namespace winrt::RNDeviceInfoCPP
     {
       try
       {
-        return isTabletHelper(winrt::to_string(Windows::Security::ExchangeActiveSyncProvisioning::EasClientDeviceInformation().OperatingSystem()));
+        return isTabletHelper();
       } catch (...)
       {
         return false;
