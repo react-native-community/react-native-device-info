@@ -20,6 +20,7 @@ import android.os.Environment;
 import android.os.PowerManager;
 import android.os.StatFs;
 import android.os.BatteryManager;
+import android.os.Debug;
 import android.provider.Settings;
 import android.webkit.WebSettings;
 import android.telephony.TelephonyManager;
@@ -454,11 +455,13 @@ public class RNDeviceModule extends ReactContextBaseJavaModule {
   public void isBatteryCharging(Promise p) { p.resolve(isBatteryChargingSync()); }
 
   @ReactMethod(isBlockingSynchronousMethod = true)
-  public int getUsedMemorySync() {
-    Runtime rt = Runtime.getRuntime();
-    long usedMemory = rt.totalMemory() - rt.freeMemory();
-    return (int)usedMemory;
+  public double getUsedMemorySync() {
+    Debug.MemoryInfo memInfo = new Debug.MemoryInfo();
+    Debug.getMemoryInfo(memInfo);
+
+    return memInfo.getTotalPss() * 1024D;
   }
+
   @ReactMethod
   public void getUsedMemory(Promise p) { p.resolve(getUsedMemorySync()); }
 
